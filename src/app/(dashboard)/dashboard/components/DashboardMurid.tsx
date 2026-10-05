@@ -19,26 +19,11 @@ export default async function DashboardMurid() {
     } catch (e) {}
   }
 
-  // Data Elearn
-  const courses = [
-    { color: "#ef4444", icon: "fas fa-fire", name: "Build Your First App", sub: "CodeIgniter" },
-    { color: "#f59e0b", icon: "fas fa-paint-brush", name: "Build Something Beautiful", sub: "Sketch" },
-    { color: "#3b82f6", icon: "fab fa-google", name: "Firebase on Android: Cloud", sub: "Firebase" },
-    { color: "#8b5cf6", icon: "fas fa-film", name: "Creating Custom Animations", sub: "Principle" },
-  ];
-
-  const paths = [
-    { title: "Intro to React", hours: "12 jam video", students: "423", color: "#e0e7ff", text: "#4f46e5" },
-    { title: "Become a Manager", hours: "8 jam video", students: "648", color: "#fce7f3", text: "#db2777" },
-    { title: "Sketch from A to Z", hours: "24 jam video", students: "562", color: "#ecfdf5", text: "#059669" },
-  ];
-
-  // Data Wireframe
-  const tugas = [
-    { color: "#ef4444", icon: "fas fa-code", name: "Tugas HTML Form & Validasi", sub: "Kelas Frontend Web Dev", date: "Hari Ini, 23:59" },
-    { color: "#f59e0b", icon: "fas fa-palette", name: "Desain UI/UX dengan Figma", sub: "Kelas UI/UX Design", date: "Besok, 12:00" },
-    { color: "#3b82f6", icon: "fas fa-database", name: "Kuis Relasi Database MySQL", sub: "Kelas Backend PHP", date: "3 Hari Lagi" },
-  ];
+  // Fetch Real Data from ViewModel
+  const uiData = await DashboardStudentViewModel.getDashboardData(userId);
+  const courses = uiData.activeCourses;
+  const paths = uiData.learningPaths;
+  const tugas = uiData.pendingTasks;
 
   return (
     <div>
@@ -170,16 +155,18 @@ export default async function DashboardMurid() {
             </div>
             <div className="p-2">
               {courses.map((item, i) => (
-                <div key={i} className="course-item d-flex align-items-center gap-3 px-3 py-3 rounded-3" style={{ cursor: "pointer" }}>
-                  <div className="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0" style={{ width: "42px", height: "42px", background: item.color, fontSize: "1.1rem" }}>
-                    <i className={item.icon}></i>
+                <Link href={`/class-room/${item.slug}`} key={i} className="text-decoration-none">
+                  <div className="course-item d-flex align-items-center gap-3 px-3 py-3 rounded-3" style={{ cursor: "pointer" }}>
+                    <div className="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0" style={{ width: "42px", height: "42px", background: item.color, fontSize: "1.1rem" }}>
+                      <i className={item.icon}></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <div className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>{item.name}</div>
+                      <div className="text-muted" style={{ fontSize: "0.8rem" }}>{item.sub}</div>
+                    </div>
+                    <i className="fas fa-chevron-right text-muted" style={{ fontSize: "0.8rem" }}></i>
                   </div>
-                  <div className="flex-grow-1">
-                    <div className="fw-semibold text-dark" style={{ fontSize: "0.9rem" }}>{item.name}</div>
-                    <div className="text-muted" style={{ fontSize: "0.8rem" }}>{item.sub}</div>
-                  </div>
-                  <i className="fas fa-chevron-right text-muted" style={{ fontSize: "0.8rem" }}></i>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

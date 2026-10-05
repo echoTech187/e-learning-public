@@ -6,11 +6,12 @@ export interface DashboardStudentUIModel {
   activeCourses: {
     id: string;
     course_id: string;
-    title: string;
+    name: string;
     thumbnail: string | null;
     color: string;
     icon: string;
     sub: string;
+    slug: string;
   }[];
   // Hardcoded for now as per current UI
   learningPaths: {
@@ -46,11 +47,12 @@ export class DashboardStudentViewModel {
     const activeCourses = enrollments.map((enrollment, index) => ({
       id: enrollment.id,
       course_id: enrollment.course_id,
-      title: enrollment.course_title || "Kursus EduNusa",
+      name: enrollment.course_title || "Kursus EduNusa",
       thumbnail: enrollment.course_thumbnail || null,
       color: colors[index % colors.length],
       icon: icons[index % icons.length],
-      sub: "Lanjutkan Belajar"
+      sub: "Lanjutkan Belajar",
+      slug: (enrollment as any).course_slug || `course-${enrollment.course_id}` // Fallback if slug isn't joined
     }));
 
     // Placeholder data for Learning Paths (Jalur Belajarmu)

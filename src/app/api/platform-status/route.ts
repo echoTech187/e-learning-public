@@ -1,0 +1,16 @@
+import { NextResponse } from "next/server"
+import { readFileSync } from "fs"
+import { join } from "path"
+
+export const dynamic = "force-dynamic"
+
+export async function GET() {
+  try {
+    const statusPath = join(process.cwd(), "public", "platform-status.json")
+    const raw = readFileSync(statusPath, "utf-8")
+    const data = JSON.parse(raw)
+    return NextResponse.json(data)
+  } catch {
+    return NextResponse.json({ is_suspended: 0, is_muted: 0 })
+  }
+}

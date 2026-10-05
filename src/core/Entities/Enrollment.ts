@@ -8,5 +8,6 @@ export interface Enrollment {
   completed_at?: string | null;
   expires_at?: string | null;
   course_title?: string;
+  course_slug?: string;
   course_thumbnail?: string;
 }

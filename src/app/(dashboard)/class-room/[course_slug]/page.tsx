@@ -38,20 +38,27 @@ export default async function BelajarPage({ params }: Props) {
   const courseUseCase = new GetCourseBySlugUseCase(new CourseRepository());
   const course = await courseUseCase.execute(course_slug);
   
-  if (!course) redirect("/dashboard");
+  if (!course) {
+    console.error("Course not found for slug:", course_slug);
+    redirect("/dashboard?error=course_not_found");
+  }
 
   const enrollmentUseCase = new GetUserEnrollmentsUseCase(new EnrollmentRepository());
   const enrollments = await enrollmentUseCase.execute(userId);
   
   const enrollment = enrollments.find(e => e.course_id === course.id);
-  if (!enrollment) redirect("/dashboard");
+  if (!enrollment) {
+    console.error("Enrollment not found for course_id:", course.id, "among", enrollments);
+    redirect("/dashboard?error=not_enrolled");
+  }
 
   const repo = new ClassroomRepository(token);
 
   try {
     const classroom = await repo.getClassroom(enrollment.id);
     return <ClassroomPlayer classroom={classroom} enrollmentId={enrollment.id} courseSlug={course_slug} token={token} />;
-  } catch {
-    redirect("/dashboard");
+  } catch (error) {
+    console.error("Failed to load classroom data:", error);
+    redirect("/dashboard?error=classroom_fetch_failed");
   }
 }

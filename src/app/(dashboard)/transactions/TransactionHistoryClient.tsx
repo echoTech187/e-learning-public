@@ -231,7 +231,7 @@ export default function TransactionHistoryClient({ initialOrders, user }: Props)
       {/* === HEADER & BREADCRUMB === */}
       <div className="mb-4">
         <div className="d-flex align-items-center gap-2 text-muted mb-1" style={{ fontSize: "0.85rem" }}>
-          <Link href="/beranda" className="text-decoration-none text-muted">
+          <Link href="/dashboard" className="text-decoration-none text-muted">
             <i className="fas fa-home me-1"></i> Dashboard
           </Link>
           <span>/</span>

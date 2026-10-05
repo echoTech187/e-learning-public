@@ -240,7 +240,7 @@ export default function DashboardSidebar({ user }: { user: any }) {
 
                 {/* Menu Items */}
                 <Link
-                  href="/beranda"
+                  href="/dashboard"
                   onClick={() => setIsMobileUserMenuOpen(false)}
                   className="d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-decoration-none text-dark"
                   style={{ fontSize: "0.85rem", fontWeight: 500, transition: "background 0.15s" }}

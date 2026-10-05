@@ -68,7 +68,7 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
 
   const handleSelectLesson = (lesson: Lesson) => {
     if (lesson.type === "quiz") {
-      router.push(`/belajar/${courseSlug}/kuis/${lesson.id}`);
+      router.push(`/class-room/${courseSlug}/kuis/${lesson.id}`);
       return;
     }
     setActiveLesson(lesson);

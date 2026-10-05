@@ -124,7 +124,7 @@ function StartScreen({ quizData, onStart, courseSlug, starting }: {
                 <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}>Anda tidak dapat mencoba kuis ini lagi</div>
               </div>
             )}
-            <Link href={`/belajar/${courseSlug}`}
+            <Link href={`/class-room/${courseSlug}`}
               className="btn w-100 mt-3 fw-semibold py-2 rounded-3"
               style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.15)" }}>
               <i className="fas fa-arrow-left me-2" />Kembali ke Materi
@@ -372,7 +372,7 @@ function ResultScreen({ result, courseSlug }: { result: QuizResult; courseSlug: 
 
         {/* Actions */}
         <div className="d-flex flex-column flex-sm-row gap-3 mb-4 mt-4" style={{ maxWidth: 720, margin: "0 auto" }}>
-          <Link href={`/belajar/${courseSlug}`}
+          <Link href={`/class-room/${courseSlug}`}
             className="btn flex-grow-1 fw-bold py-3 rounded-3"
             style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff", border: "none" }}>
             <i className="fas fa-arrow-left me-2" />Kembali ke Materi

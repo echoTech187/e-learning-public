@@ -243,7 +243,7 @@ export default function TransactionDetailClient({ orderCode, user }: { orderCode
       {/* === HEADER & BREADCRUMB === */}
       <div className="mb-5 pb-3 border-bottom" style={{ borderColor: "#f1f5f9" }}>
           <div className="d-flex align-items-center gap-2 mb-3" style={{ fontSize: "0.85rem", fontWeight: "500", color: "#64748b" }}>
-            <Link href="/beranda" className="text-decoration-none text-muted d-flex align-items-center gap-1 hover-primary transition-colors">
+            <Link href="/dashboard" className="text-decoration-none text-muted d-flex align-items-center gap-1 hover-primary transition-colors">
               <i className="fas fa-home"></i> Dashboard
             </Link>
             <span style={{ color: "#cbd5e1" }}>/</span>

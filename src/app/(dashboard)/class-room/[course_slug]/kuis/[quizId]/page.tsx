@@ -50,7 +50,7 @@ export default async function QuizPage({ params }: PageProps) {
     const quizData = await repo.getQuiz(quizId);
     
     if (!quizData) {
-      redirect(`/belajar/${course_slug}?error=quiz_not_found`);
+      redirect(`/class-room/${course_slug}?error=quiz_not_found`);
     }
 
     return (
@@ -64,6 +64,6 @@ export default async function QuizPage({ params }: PageProps) {
     );
   } catch (error: any) {
     console.error("Failed to load quiz data:", error);
-    redirect(`/belajar/${course_slug}?error=quiz_load_failed`);
+    redirect(`/class-room/${course_slug}?error=quiz_load_failed`);
   }
 }

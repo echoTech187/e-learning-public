@@ -27,7 +27,7 @@ export default function TransactionStatusPage() {
                 setStatus('paid');
                 clearInterval(interval);
                 setTimeout(() => {
-                    router.push('/beranda');
+                    router.push('/dashboard');
                 }, 3000);
             } else if (result.success && result.status === 'expired') {
                 setStatus('expired');
@@ -271,7 +271,7 @@ export default function TransactionStatusPage() {
                         ) : status === 'paid' ? (
                             <>
                                 <Link 
-                                    href="/beranda" 
+                                    href="/dashboard" 
                                     className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:bg-indigo-700 hover:shadow-[0_6px_16px_rgba(79,70,229,0.3)] transition-all duration-300 active:scale-[0.98]"
                                 >
                                     <CheckCircle2 className="w-4 h-4" />
@@ -313,7 +313,7 @@ export default function TransactionStatusPage() {
                                         const result = await checkStatus();
                                         if (result.success && result.status === 'paid') {
                                             setStatus('paid');
-                                            setTimeout(() => router.push('/beranda'), 2000);
+                                            setTimeout(() => router.push('/dashboard'), 2000);
                                         } else if (result.success && result.status === 'expired') {
                                             setStatus('expired');
                                             toast.error('Batas waktu pembayaran 1 jam telah berakhir.', { duration: 4000 });

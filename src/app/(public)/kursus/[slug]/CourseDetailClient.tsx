@@ -250,7 +250,7 @@ export default function CourseDetailClient({ course, enrollments }: CourseDetail
 
               {isEnrolled ? (
                 <FlatButton
-                  onClick={() => router.push("/beranda")}
+                  onClick={() => router.push("/dashboard")}
                   variant="solid"
                   colorTheme="green"
                   fullWidth
@@ -513,7 +513,7 @@ export default function CourseDetailClient({ course, enrollments }: CourseDetail
                 {/* Primary CTA Button */}
                 {isEnrolled ? (
                   <FlatButton
-                    onClick={() => router.push("/beranda")}
+                    onClick={() => router.push("/dashboard")}
                     variant="solid"
                     colorTheme="green"
                     fullWidth
@@ -602,7 +602,7 @@ export default function CourseDetailClient({ course, enrollments }: CourseDetail
         </div>
         {isEnrolled ? (
           <FlatButton
-            onClick={() => router.push("/beranda")}
+            onClick={() => router.push("/dashboard")}
             variant="solid"
             colorTheme="green"
             size="md"

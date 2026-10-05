@@ -58,7 +58,7 @@ export const ModernCourseCard: React.FC<ModernCourseCardProps> = ({
           {isEnrolled ? (
             <PillButton 
               color="#10B981" 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/beranda'); }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push('/dashboard'); }}
             >
               Lanjutkan
             </PillButton>

@@ -10,7 +10,7 @@ export async function dummyLoginAction(formData: FormData) {
   const dummyUser = { id: "99999999-9999-4999-a999-999999999999", name: `Test ${role}`, email: `${role}@test.com`, role: role };
   cookieStore.set('token', 'dummy-token-123', { httpOnly: true, path: '/' });
   cookieStore.set('user', JSON.stringify(dummyUser), { httpOnly: false, path: '/' });
-  redirect('/beranda');
+  redirect('/dashboard');
 }
 
 export async function loginAction(prevState: any, formData: FormData) {
@@ -24,7 +24,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     const cookieStore = await cookies();
     cookieStore.set('token', 'dummy-token', { path: '/' });
     cookieStore.set('user', JSON.stringify({ id: "00000000-0000-4000-a000-000000000099", name: r.toUpperCase(), email: email, role: r }), { path: '/' });
-    redirect('/beranda');
+    redirect('/dashboard');
   }
 
   if (!email || !password) return { error: 'Email dan password wajib diisi' };
@@ -49,7 +49,7 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   if (userRole === 'pending') redirect('/onboarding');
-  redirect('/beranda');
+  redirect('/dashboard');
 }
 
 export async function registerAction(prevState: any, formData: FormData) {
@@ -106,7 +106,7 @@ export async function onboardingAction(prevState: any, formData: FormData) {
     return { error: 'Terjadi kesalahan sistem' };
   }
 
-  redirect('/beranda');
+  redirect('/dashboard');
 }
 
 export async function logoutAction() {

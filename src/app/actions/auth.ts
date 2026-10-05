@@ -83,6 +83,11 @@ export async function registerAction(prevState: any, formData: FormData) {
 export async function onboardingAction(prevState: any, formData: FormData) {
   const role = formData.get('role');
   const phone = formData.get('phone');
+  const profession = formData.get('profession');
+  const birthDate = formData.get('birth_date');
+  const parentEmail = formData.get('parent_email');
+  const referredBy = formData.get('referred_by');
+  const interests = formData.getAll('interests');
   
   try {
     const cookieStore = await cookies();
@@ -94,7 +99,16 @@ export async function onboardingAction(prevState: any, formData: FormData) {
     const res = await fetch(`${API_URL}/api/v1/auth/onboarding`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ user_id: user.id, role: role, phone: phone }),
+      body: JSON.stringify({ 
+        user_id: user.id, 
+        role: role, 
+        profile: { phone: phone }, 
+        profession: profession,
+        birth_date: birthDate,
+        parent_email: parentEmail,
+        referred_by: referredBy, 
+        interests: interests.length > 0 ? interests : null 
+      }),
       cache: 'no-store'
     });
     const data = await res.json();

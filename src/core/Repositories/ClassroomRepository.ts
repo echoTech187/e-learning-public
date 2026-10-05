@@ -1,6 +1,8 @@
-﻿import { ClassroomData, QuizData, QuizResult } from "@/core/Entities/Classroom";
+import { ClassroomData, QuizData, QuizResult } from "@/core/Entities/Classroom";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://openapi.edunusa.edu.id/api/v1";
+const API_BASE = typeof window === "undefined"
+  ? ((process.env.API_GATEWAY_URL || "http://e-learning-docker-api-1") + "/api/v1")
+  : (process.env.NEXT_PUBLIC_API_BASE_URL || "https://openapi.edunusa.edu.id/api/v1");
 
 export class ClassroomRepository {
   private token: string;

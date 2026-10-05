@@ -1643,7 +1643,7 @@ body.menu-open {
 
 .dashboard-content {
   flex: 1;
-  padding: 28px 32px;
+  padding: 28px 24px;
 }
 
 /* Cards */

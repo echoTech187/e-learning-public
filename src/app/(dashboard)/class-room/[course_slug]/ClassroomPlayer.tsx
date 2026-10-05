@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { ClassroomData, Lesson } from "@/core/Entities/Classroom";
 import { ClassroomRepository } from "@/core/Repositories/ClassroomRepository";
+import { markLessonCompleteAction } from "@/actions/lessonActions";
 
 interface Props {
   classroom: ClassroomData;
@@ -41,7 +42,7 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
-  const watchTimeRef = useRef<number>(0);
+  const [watchTime, setWatchTime] = useState(0);
   const watchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -58,10 +59,10 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
   }, []);
 
   useEffect(() => {
-    watchTimeRef.current = 0;
+    setWatchTime(activeLesson?.progress?.watch_time || 0);
     if (watchTimerRef.current) clearInterval(watchTimerRef.current);
     if (activeLesson) {
-      watchTimerRef.current = setInterval(() => { watchTimeRef.current += 30; }, 30000);
+      watchTimerRef.current = setInterval(() => { setWatchTime((prev) => prev + 30); }, 30000);
     }
     return () => { if (watchTimerRef.current) clearInterval(watchTimerRef.current); };
   }, [activeLesson?.id]);
@@ -76,10 +77,27 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
 
   const handleMarkComplete = useCallback(async () => {
     if (!activeLesson || completing) return;
+    
+    // Validasi 50% watch time untuk konten video/youtube
+    if (activeLesson.type === "youtube" || activeLesson.type === "video") {
+      if (activeLesson.duration) {
+        const requiredSeconds = (activeLesson.duration * 60) / 2;
+        // Berikan sedikit toleransi sinkronisasi timer (misal kurangi 10 detik)
+        if (watchTime < requiredSeconds - 10) {
+          toast.error(`Anda harus menonton minimal 50% (${Math.ceil(activeLesson.duration / 2)} menit) sebelum menandai selesai.`, {
+             icon: "⏳"
+          });
+          return;
+        }
+      }
+    }
+
     setCompleting(true);
     const tid = toast.loading("Menandai selesai...");
     try {
-      await repo.markLessonComplete(activeLesson.id, watchTimeRef.current);
+      const res = await markLessonCompleteAction(activeLesson.id, watchTime);
+      if (!res.success) throw new Error(res.message);
+
       setData((prev) => {
         const sections = prev.sections.map((sec) => ({
           ...sec,
@@ -95,14 +113,23 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
       if (idx >= 0 && idx < allLessons.length - 1) setTimeout(() => setActiveLesson(allLessons[idx + 1]), 800);
     } catch { toast.error("Gagal menyimpan progress", { id: tid }); }
     finally { setCompleting(false); }
-  }, [activeLesson, completing]);
+  }, [activeLesson, completing, watchTime]);
 
   const toggleSection = (id: string) =>
     setOpenSections((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const allLessons = data.sections.flatMap((s) => s.lessons);
+  const firstUncompletedIndex = allLessons.findIndex(l => !l.is_completed);
   const isCompleted = allLessons.find((l) => l.id === activeLesson?.id)?.is_completed ?? false;
   const progress = data.progress_summary;
+
+  let isWatchTimeValid = true;
+  if (activeLesson && (activeLesson.type === "youtube" || activeLesson.type === "video") && activeLesson.duration) {
+    const requiredSeconds = (activeLesson.duration * 60) / 2;
+    if (watchTime < requiredSeconds - 10) {
+      isWatchTimeValid = false;
+    }
+  }
 
   function renderContent() {
     if (!activeLesson) return (
@@ -114,10 +141,20 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
     if (activeLesson.type === "youtube" && activeLesson.content) {
       const m = activeLesson.content.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
       const vid = m?.[1] || activeLesson.content;
-      return <div className="ratio ratio-16x9"><iframe src={`https://www.youtube.com/embed/${vid}?autoplay=1&rel=0`} title="YouTube" allow="autoplay; encrypted-media" allowFullScreen /></div>;
+      return (
+        <div style={{ position: "relative", width: "100%", paddingBottom: "56.25%", background: "#000" }}>
+          <iframe 
+            src={`https://www.youtube.com/embed/${vid}?rel=0&showinfo=0&autoplay=0&mute=0`} 
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }} 
+            title="YouTube" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowFullScreen 
+          />
+        </div>
+      );
     }
     if (activeLesson.type === "video" && activeLesson.content) return (
-      <div className="ratio ratio-16x9"><video src={activeLesson.content} controls autoPlay style={{ background: "#000", width: "100%", height: "100%", objectFit: "contain" }} /></div>
+      <div style={{ width: "100%", aspectRatio: "16/9", background: "#000" }}><video src={activeLesson.content} controls style={{ width: "100%", height: "100%", objectFit: "contain", border: 0 }} /></div>
     );
     if (activeLesson.type === "pdf" && activeLesson.content) return (
       <div style={{ height: "70vh" }}><iframe src={activeLesson.content} className="w-100 h-100 border-0" title="PDF" /></div>
@@ -139,10 +176,10 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
   }
 
   return (
-    <>
+    <div style={{ margin: "-28px -32px", minHeight: "calc(100vh - 72px)", display: "flex", flexDirection: "column" }}>
       {/* ── Top Bar ── */}
       <div className="d-flex align-items-center gap-3 px-3 px-md-4 py-2 border-bottom" style={{ background: "#fff", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-        <Link href="/murid" className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: 36, height: 36, background: "#f1f5f9", border: "none" }}>
+        <Link href={`/courses/${courseSlug}`} className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: 36, height: 36, background: "#f1f5f9", border: "none" }}>
           <i className="fas fa-arrow-left text-dark" style={{ fontSize: "0.8rem" }} />
         </Link>
         <div className="flex-grow-1 overflow-hidden">
@@ -163,8 +200,8 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
       {/* ── Body ── */}
       <div className="d-flex" style={{ minHeight: "calc(100vh - 57px)" }}>
         {/* ── Content Area ── */}
-        <div className="flex-grow-1" style={{ minWidth: 0, background: "#0f172a" }}>
-          <div style={{ background: "#0f172a" }}>{renderContent()}</div>
+        <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0, background: "#f8fafc" }}>
+          <div style={{ background: "#0f172a", flexShrink: 0, position: "relative", zIndex: 10 }}>{renderContent()}</div>
 
           {/* Lesson info bar */}
           {activeLesson && (
@@ -187,9 +224,10 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
                     </div>
                   ) : (
                     <button
-                      className="btn fw-semibold px-4 py-2 rounded-3"
-                      style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff", border: "none", fontSize: "0.88rem" }}
-                      onClick={handleMarkComplete} disabled={completing}
+                      className={`btn fw-semibold px-4 py-2 rounded-3 ${!isWatchTimeValid ? 'bg-gray-200 text-gray-400' : ''}`}
+                      style={isWatchTimeValid ? { background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff", border: "none", fontSize: "0.88rem" } : { background: "#e5e7eb", color: "#9ca3af", border: "none", fontSize: "0.88rem" }}
+                      onClick={handleMarkComplete} disabled={completing || !isWatchTimeValid}
+                      title={!isWatchTimeValid ? `Anda harus menonton minimal 50% (${Math.ceil((activeLesson.duration || 0) / 2)} menit) untuk menandai selesai.` : ""}
                     >
                       {completing ? <><span className="spinner-border spinner-border-sm me-2" />Menyimpan...</> : <><i className="fas fa-check me-2" />Tandai Selesai</>}
                     </button>
@@ -229,15 +267,24 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
 
                   {isOpen && sec.lessons.map((lesson) => {
                     const isAct = activeLesson?.id === lesson.id;
+                    const lessonIndex = allLessons.findIndex(l => l.id === lesson.id);
+                    const isLocked = firstUncompletedIndex !== -1 && lessonIndex > firstUncompletedIndex;
+
                     return (
                       <button
                         key={lesson.id}
                         className="w-100 text-start border-0 d-flex align-items-center gap-3 px-3 py-2"
-                        style={{ background: isAct ? "#ede9fe" : "transparent", cursor: "pointer", borderLeft: isAct ? "3px solid #6366f1" : "3px solid transparent" }}
-                        onClick={() => handleSelectLesson(lesson)}
+                        style={{ 
+                          background: isAct ? "#ede9fe" : "transparent", 
+                          cursor: isLocked ? "not-allowed" : "pointer", 
+                          borderLeft: isAct ? "3px solid #6366f1" : "3px solid transparent",
+                          opacity: isLocked ? 0.5 : 1
+                        }}
+                        onClick={() => !isLocked && handleSelectLesson(lesson)}
+                        disabled={isLocked}
                       >
                         <div className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style={{ width: "22px", height: "22px", background: lesson.is_completed ? "#dcfce7" : isAct ? "#ede9fe" : "#f1f5f9", border: `1.5px solid ${lesson.is_completed ? "#16a34a" : isAct ? "#6366f1" : "#e2e8f0"}` }}>
-                          {lesson.is_completed ? <i className="fas fa-check" style={{ fontSize: "0.6rem", color: "#16a34a" }} /> : <LessonTypeIcon type={lesson.type} />}
+                          {lesson.is_completed ? <i className="fas fa-check" style={{ fontSize: "0.6rem", color: "#16a34a" }} /> : isLocked ? <i className="fas fa-lock text-muted" style={{ fontSize: "0.6rem" }} /> : <LessonTypeIcon type={lesson.type} />}
                         </div>
                         <div className="flex-grow-1 overflow-hidden">
                           <div className="text-truncate fw-medium" style={{ fontSize: "0.8rem", color: isAct ? "#4f46e5" : "#334155" }}>{lesson.title}</div>
@@ -263,6 +310,6 @@ export default function ClassroomPlayer({ classroom, enrollmentId, courseSlug, t
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

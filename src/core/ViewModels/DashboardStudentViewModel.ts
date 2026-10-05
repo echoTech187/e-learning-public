@@ -12,6 +12,7 @@ export interface DashboardStudentUIModel {
     icon: string;
     sub: string;
     slug: string;
+    progress: number;
   }[];
   // Hardcoded for now as per current UI
   learningPaths: {
@@ -52,7 +53,8 @@ export class DashboardStudentViewModel {
       color: colors[index % colors.length],
       icon: icons[index % icons.length],
       sub: "Lanjutkan Belajar",
-      slug: (enrollment as any).course_slug || `course-${enrollment.course_id}` // Fallback if slug isn't joined
+      slug: (enrollment as any).course_slug || `course-${enrollment.course_id}`,
+      progress: (enrollment as any).progress ? parseFloat((enrollment as any).progress) : 0
     }));
 
     // Placeholder data for Learning Paths (Jalur Belajarmu)
